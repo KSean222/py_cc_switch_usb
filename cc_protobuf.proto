@@ -51,7 +51,7 @@ message PollNextMoveArgs {
 
 message PollNextMoveResult {
     required CCBotPollStatus status = 1;
-    required CCMove move = 2;
+    optional CCMove move = 2;
     repeated CCPlanPlacement plan = 3;
 }
 
@@ -62,7 +62,7 @@ message BlockNextMoveArgs {
 
 message BlockNextMoveResult {
     required CCBotPollStatus status = 1;
-    required CCMove move = 2;
+    optional CCMove move = 2;
     repeated CCPlanPlacement plan = 3;
 }
 
