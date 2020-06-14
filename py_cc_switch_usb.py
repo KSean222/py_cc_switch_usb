@@ -48,7 +48,7 @@ class CCSwitchUsb:
         self._in = None
         self._handles = {}
 
-    def try_connect(self, vendor_id=0x057E, product_id=0x3000):
+    def try_connect(self, vendor_id = 0x057E, product_id = 0x3000):
         self._dev = usb.core.find(idVendor=vendor_id, idProduct=product_id)
         if self._dev is not None:
             try:
@@ -84,6 +84,54 @@ class CCSwitchUsb:
         self._handles.pop(args.handle_id).terminate()
         return cc_pb.TerminateHandleResult()
 
+    def reset(self, buf):
+        args = cc_pb.ResetArgs()
+        args.ParseFromString(buf)
+
+        field = (args.field[x:x+10] for x in range(0, 40, 10))
+        self._handles[args.handle_id].reset(field, args.b2b, args.combo)
+        return cc_pb.ResetResult()
+
+    def add_next_piece(self, buf):
+        args = cc_pb.AddNextPieceArgs()
+        args.ParseFromString(buf)
+
+        self._handles[args.handle_id].add_next_piece(args.piece)
+        return cc_pb.AddNextPieceResult()
+
+    def request_next_move(self, buf):
+        args = cc_pb.RequestNextMoveArgs()
+        args.ParseFromString(buf)
+
+        self._handles[args.handle_id].request_next_move(args.incoming)
+        return cc_pb.RequestNextMoveResult()
+
+    def poll_next_move(self, buf):
+        args = cc_pb.PollNextMoveArgs()
+        args.ParseFromString(buf)
+
+        status, move, plan = self._handles[args.handle_id].poll_next_move(args.plan_length)
+
+        result = cc_pb.PollNextMoveResult(status = status)
+        if status == py_cc.CCBotPollStatus.MOVE_PROVIDED:
+            value_to_proto(move, result.move)
+            for placement in plan:
+                value_to_proto(placement, result.plan.add())
+        return result
+
+    def block_next_move(self, buf):
+        args = cc_pb.BlockNextMoveArgs()
+        args.ParseFromString(buf)
+
+        status, move, plan = self._handles[args.handle_id].block_next_move(args.plan_length)
+
+        result = cc_pb.BlockNextMoveResult(status = status)
+        if status == py_cc.CCBotPollStatus.MOVE_PROVIDED:
+            value_to_proto(move, result.move)
+            for placement in plan:
+                value_to_proto(placement, result.plan.add())
+        return result
+
     def handle_commands(self, dbg = None):
         if dbg == None:
             while not self.try_connect():
@@ -99,7 +147,12 @@ class CCSwitchUsb:
         
         commands = [
             self.new_handle,
-            self.terminate_handle
+            self.terminate_handle,
+            self.reset,
+            self.add_next_piece,
+            self.request_next_move,
+            self.poll_next_move,
+            self.block_next_move
         ]
 
         while True:
