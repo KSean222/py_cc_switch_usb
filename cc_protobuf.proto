@@ -1,0 +1,134 @@
+syntax = "proto2";
+
+package cold_clear_protobuf;
+
+message NewHandleArgs {
+    required CCOptions options = 1;
+    required CCWeights weights = 2;
+}
+
+message NewHandleResult {
+    required fixed64 handle_id = 1;
+}
+
+message TerminateHandleArgs {
+    required fixed64 handle_id = 1;
+}
+
+message TerminateHandleResult {
+}
+
+enum CCPiece {
+    CC_I = 0;
+    CC_T = 1;
+    CC_O = 2;
+    CC_S = 3;
+    CC_Z = 4;
+    CC_L = 5;
+    CC_J = 6;
+}
+
+enum CCTspinStatus {
+    CC_NONE_TSPIN_STATUS = 0;
+    CC_MINI = 1;
+    CC_FULL = 2;
+}
+
+enum CCMovement {
+    CC_LEFT = 0;
+    CC_RIGHT = 1;
+    CC_CW = 2;
+    CC_CCW = 3;
+    /* Soft drop all the way down */
+    CC_DROP = 4;
+}
+
+enum CCMovementMode {
+    CC_0G = 0;
+    CC_20G = 1;
+    CC_HARD_DROP_ONLY = 2;
+}
+
+enum CCBotPollStatus {
+    CC_MOVE_PROVIDED = 0;
+    CC_WAITING = 1;
+    CC_BOT_DEAD = 2;
+}
+
+message CCPlanPlacement {
+    required CCPiece piece = 1;
+    required CCTspinStatus tspin = 2;
+
+    /* Expected cell coordinates of placement, (0, 0) being the bottom left. */
+    repeated fixed32 expected_x = 3;
+    repeated fixed32 expected_y = 4;
+
+    /* Expected lines that will be cleared after placement, with -1 indicating no line */
+    repeated sfixed32 cleared_lines = 5;
+}
+
+message CCMove {
+    /* Whether hold is required */
+    required bool hold = 1;
+    /* Expected cell coordinates of placement, (0, 0) being the bottom left */
+    repeated fixed32 expected_x = 2;
+    repeated fixed32 expected_y = 3;
+    /* Number of moves in the path */
+    required fixed32 movement_count = 4;
+    /* Movements */
+    repeated CCMovement movements = 5;
+
+    /* Bot Info */
+    required fixed32 nodes = 6;
+    required fixed32 depth = 7;
+    required fixed32 original_rank = 8;
+}
+
+message CCOptions {
+    required CCMovementMode mode = 1;
+    required bool use_hold = 2;
+    required bool speculate = 3;
+    required bool pcloop = 4;
+    required fixed32 min_nodes = 5;
+    required fixed32 max_nodes = 6;
+    required fixed32 threads = 7;
+}
+
+message CCWeights {
+    required sfixed32 back_to_back = 1;
+    required sfixed32 bumpiness = 2;
+    required sfixed32 bumpiness_sq = 3;
+    required sfixed32 height = 4;
+    required sfixed32 top_half = 5;
+    required sfixed32 top_quarter = 6;
+    required sfixed32 jeopardy = 7;
+    required sfixed32 cavity_cells = 8;
+    required sfixed32 cavity_cells_sq = 9;
+    required sfixed32 overhang_cells = 10;
+    required sfixed32 overhang_cells_sq = 11;
+    required sfixed32 covered_cells = 12;
+    required sfixed32 covered_cells_sq = 13;
+    /* Length 4 */
+    repeated sfixed32 tslot = 14;
+    required sfixed32 well_depth = 15;
+    required sfixed32 max_well_depth = 16;
+    /* Length 10 */
+    repeated sfixed32 well_column = 17;
+
+    required sfixed32 b2b_clear = 18;
+    required sfixed32 clear1 = 19;
+    required sfixed32 clear2 = 20;
+    required sfixed32 clear3 = 21;
+    required sfixed32 clear4 = 22;
+    required sfixed32 tspin1 = 23;
+    required sfixed32 tspin2 = 24;
+    required sfixed32 tspin3 = 25;
+    required sfixed32 mini_tspin1 = 26;
+    required sfixed32 mini_tspin2 = 27;
+    required sfixed32 perfect_clear = 28;
+    required sfixed32 combo_garbage = 29;
+    required sfixed32 move_time = 30;
+    required sfixed32 wasted_t = 31;
+
+    required bool use_bag = 32;
+}
