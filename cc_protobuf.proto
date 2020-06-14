@@ -18,6 +18,75 @@ message TerminateHandleArgs {
 message TerminateHandleResult {
 }
 
+message ResetArgs {
+    required fixed64 handle_id = 1;
+    repeated bool field = 2;
+    required bool b2b = 3;
+    required fixed32 combo = 4;
+}
+
+message ResetResult {
+}
+
+message AddNextPieceArgs {
+    required fixed64 handle_id = 1;
+    required CCPiece piece = 2;
+}
+
+message AddNextPieceResult {
+}
+
+message RequestNextMoveArgs {
+    required fixed64 handle_id = 1;
+    required fixed32 incoming = 2;
+}
+
+message RequestNextMoveResult {
+}
+
+message PollNextMoveArgs {
+    required fixed64 handle_id = 1;
+    required fixed32 plan_length = 2;
+}
+
+message PollNextMoveResult {
+    required CCBotPollStatus status = 1;
+    required CCMove move = 2;
+    repeated CCPlanPlacement plan = 3;
+}
+
+message BlockNextMoveArgs {
+    required fixed64 handle_id = 1;
+    required fixed32 plan_length = 2;
+}
+
+message BlockNextMoveResult {
+    required CCBotPollStatus status = 1;
+    required CCMove move = 2;
+    repeated CCPlanPlacement plan = 3;
+}
+
+message DefaultOptionsArgs {
+}
+
+message DefaultOptionsResult {
+    required CCOptions options = 1;
+}
+
+message DefaultWeightsArgs {
+}
+
+message DefaultWeightsResult {
+    required CCWeights weights = 1;
+}
+
+message FastWeightsArgs {
+}
+
+message FastWeightsResult {
+    required CCWeights weights = 1;
+}
+
 enum CCPiece {
     CC_I = 0;
     CC_T = 1;
