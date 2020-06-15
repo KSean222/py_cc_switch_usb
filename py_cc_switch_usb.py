@@ -132,6 +132,30 @@ class CCSwitchUsb:
                 value_to_proto(placement, result.plan.add())
         return result
 
+    def default_options(self, buf):
+        args = cc_pb.DefaultOptionsArgs()
+        args.ParseFromString(buf)
+
+        result = cc_pb.DefaultOptionsResult()
+        value_to_proto(py_cc.CCOptions.default(), result.options)
+        return result
+
+    def default_weights(self, buf):
+        args = cc_pb.DefaultWeightsArgs()
+        args.ParseFromString(buf)
+
+        result = cc_pb.DefaultWeightsResult()
+        value_to_proto(py_cc.CCWeights.default(), result.weights)
+        return result
+
+    def fast_weights(self, buf):
+        args = cc_pb.FastWeightsArgs()
+        args.ParseFromString(buf)
+
+        result = cc_pb.FastWeightsResult()
+        value_to_proto(py_cc.CCWeights.fast(), result.weights)
+        return result
+
     def handle_commands(self, dbg = None):
         if dbg == None:
             while not self.try_connect():
@@ -152,7 +176,10 @@ class CCSwitchUsb:
             self.add_next_piece,
             self.request_next_move,
             self.poll_next_move,
-            self.block_next_move
+            self.block_next_move,
+            self.default_options,
+            self.default_weights,
+            self.fast_weights
         ]
 
         while True:
