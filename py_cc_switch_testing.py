@@ -20,10 +20,10 @@ def io(rx):
 
     def new_handle(options, weights):
         nonlocal result
-        handle_args = cc_pb.NewHandleArgs()
-        cc_usb.value_to_proto(py_cc.CCOptions.default(), handle_args.options)
-        cc_usb.value_to_proto(py_cc.CCWeights.default(), handle_args.weights)
-        yield command(0, handle_args)
+        args = cc_pb.NewHandleArgs()
+        args.options.CopyFrom(options)
+        args.weights.CopyFrom(weights)
+        yield command(0, args)
         result = cc_pb.NewHandleResult()
         result.ParseFromString(read())
         result = result.handle_id
@@ -67,7 +67,27 @@ def io(rx):
         result.ParseFromString(read())
         result = (result.status, result.move, result.plan)
 
-    yield from new_handle(py_cc.CCOptions.default(), py_cc.CCOptions.default())
+    def default_options():
+        nonlocal result
+        args = cc_pb.DefaultOptionsArgs()
+        yield command(7, args)
+        result = cc_pb.DefaultOptionsResult()
+        result.ParseFromString(read())
+        result = result.options
+
+    def default_weights():
+        nonlocal result
+        args = cc_pb.DefaultWeightsArgs()
+        yield command(8, args)
+        result = cc_pb.DefaultWeightsResult()
+        result.ParseFromString(read())
+        result = result.weights
+
+    yield from default_options()
+    options = result
+    yield from default_weights()
+    weights = result
+    yield from new_handle(options, weights)
     bot = result
     field = [[False for x in range(10)] for y in range(40)]
     queue = deque()
